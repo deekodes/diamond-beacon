@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { DiamondBeacon } from "../beacon/DiamondBeacon.sol";
-import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
+import {DiamondBeacon} from "../beacon/DiamondBeacon.sol";
+import {IDiamondLoupe} from "../interfaces/IDiamondLoupe.sol";
 
 contract Simulant {
-	address public immutable diamondBeacon;
+    address public immutable diamondBeacon;
 
-	constructor(address _diamondBeacon) {
-		diamondBeacon = _diamondBeacon;
-	}
+    constructor(address _diamondBeacon) {
+        diamondBeacon = _diamondBeacon;
+    }
 
-	fallback() external payable {
-		address facet = IDiamondLoupe(diamondBeacon).facetAddress(msg.sig);
-		require(facet != address(0), "Simulant: Function does not exist");
+    fallback() external payable {
+        address facet = IDiamondLoupe(diamondBeacon).facetAddress(msg.sig);
+        require(facet != address(0), "Simulant: Function does not exist");
         // Execute external function from facet using delegatecall and return any value.
         assembly {
             // copy function selector and any arguments
@@ -24,14 +24,10 @@ contract Simulant {
             returndatacopy(0, 0, returndatasize())
             // return any return value or error back to the caller
             switch result
-                case 0 {
-                    revert(0, returndatasize())
-                }
-                default {
-                    return(0, returndatasize())
-                }
+            case 0 { revert(0, returndatasize()) }
+            default { return(0, returndatasize()) }
         }
-	}
-	
-	receive() external payable {}
+    }
+
+    receive() external payable {}
 }
